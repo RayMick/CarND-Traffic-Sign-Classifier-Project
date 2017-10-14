@@ -26,16 +26,12 @@ The goals / steps of this project are the following:
 [image1]: ./writeup_images/visualization.png "Visualization"
 [image2]: ./writeup_images/color.png "Original Color"
 [image3]: ./writeup_images/after-pre-proccessing.png "Random Noise"
-[image4]: ./writeup_images/new_traffic_signs.png "Traffic Sign 1"
-[image5]: ./writeup_images/new_image_predictions.png "Traffic Sign 2"
-[image6]: ./writeup_images/new_image_probabilities.png "Traffic Sign 3"
-[image7]: ./writeup_images/new4.png "Traffic Sign 4"
-[image8]: ./writeup_images/new5.png "Traffic Sign 5"
-[image9]: ./writeup_images/new6.png "Traffic Sign 6"
-[image10]: ./writeup_images/new7.png "Traffic Sign 7"
-[image11]: ./writeup_images/new8.png "Traffic Sign 8"
-[image12]: ./writeup_images/new9.png "Traffic Sign 9"
-[image13]: ./writeup_images/new10.png "Traffic Sign 10"
+[image4]: ./writeup_images/new_image_after_resize.png "Traffic Sign 1"
+[image5]: ./writeup_images/new_image_after_grayscale.png "Traffic Sign 1"
+[image6]: ./writeup_images/new_image_predictions.png "Traffic Sign 2"
+[image7]: ./writeup_images/new_image_probabilities.png "Traffic Sign 3"
+[image8]: ./writeup_images/new4.png "Traffic Sign 4"
+
 
 ## **Rubric Points**
 Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/481/view) individually and describe how I addressed each point in my implementation.  
@@ -57,7 +53,7 @@ signs data set:
 * The size of training set is 34799
 * The size of the validation set is 4410
 * The size of test set is 12630
-* The shape of a traffic sign image is 32x32 after resizing
+* <Mark> **The shape of original traffic sign images come in different sizes. THE pickled data are resized to 32x32x3 (the last 3 means it is a 3-channel color image). And later on in the project, these images are converted to 32x32x1 (single channel grayscale images)** </Mark>
 * The number of unique classes/labels in the data set is 43
 
 ####2. Include an exploratory visualization of the dataset.
@@ -166,7 +162,8 @@ The architecture is almost kept the same. Only dimensions of the inputs and outp
 
 Batch size, epochs, leaning rate are all tuned to improve the performance.
 The final values are presented in above paragraphs.
-I found out that using a relatively small batch size (64) and learning rate (0.0005) help improve the validation accuracy. Also larger number of epochs helps the model to settle to the optimal state.
+I found out that using a relatively small batch size (64) and learning rate (0.0005) help improve the validation accuracy. Also larger number of epochs affects the final prediction performance a lot.
+<mark>**During the first submission, I used a total epoch of 50 and it actually leads to overfitting, since the validation accuracy is essentials flat and unchanged after about ~28 iterations. Therefore, for the second submission, I changed the number of epochs from 50 to 28. This prevents the overfitting and the prediction accuracy on the newly images found online also improves a lot! Thanks for the first reviewer's precious feedback!**</mark>
 
 * What are some of the important design choices and why were they chosen? For example, why might a convolution layer work well with this problem? How might a dropout layer help with creating a successful model?
 
@@ -181,16 +178,27 @@ Here are German traffic signs that I found on the web:
 
 ![alt text][image4]
 
-The last two images might be difficult to classify because they are not part of the original training data set.
+The second image ("pedestrian only") and last image ("no parking") might be difficult to classify because they are not part of the original training data set.
+
+<Mark> **In order to do the recognition of the new images, same pre-precosssing are carried out, namely normalization, exposure equalization and converting to grayscale.** </Mark>
+
+
+![alt text][image5]
 
 ####2. Discuss the model's predictions on these new traffic signs and compare the results to predicting on the test set. At a minimum, discuss what the predictions were, the accuracy on these new predictions, and compare the accuracy to the accuracy on the test set (OPTIONAL: Discuss the results in more detail as described in the "Stand Out Suggestions" part of the rubric).
 
 Here are the results of the prediction:
 
-![alt text][image5]
+![alt text][image6]
 
-"Bumpy road", "General caution" and "Speed limit (60km/h)" are classified corectly.
-While the others are not. There are quite few possible reasons for this degraded performance compared to the results on the validation and testing data sets (99% and 94%).
+<Mark> **
+Except the two new images "pedestrian only", "no parking" and the "speed limit 70km/h", all other images are classified correctly, which gives a total accuracy of 70%.
+
+Close inspection at the three mis-classified images, we can find that even though they are not the right labels, the predictions are not far off. For example, the "pedestrian only" after converting to grayscale indeed looks like "go straight or right", which can be seen from image 5 (the grayscale results for the 10 new images).
+
+There are also quite few possible reasons for this degraded performance compared to the results on the validation and testing data sets (99% and 94%).
+**</Mark>
+
 
 1. The newly download images come in different sizes, a downsampling is performed to resize the images to 32 x 32.
 The OpenCV resize function is used to do the downsampling, which generates aliasing. This could affect the correctness of the model since at a low resolution, aliasing could present noisy features that distracts the model.
@@ -203,10 +211,12 @@ The OpenCV resize function is used to do the downsampling, which generates alias
 
 The code for making predictions on my final model is located in second last cell of the Ipython notebook.
 
+<Mark> **
+The possibilities of each prediction are shown in the image below. We can see that the model is quite certain (100% probability) about the 8 images and these images are classified correctly (with the exception of the "pedestrian only", which again looks overall a lot like the "go straight or right" in grayscale). And even when presented with unseen type of images, such as "no parking", the model is able to find the most resemble existing labels (like "Yield" and "Priority road").
+** <Mark>
+![alt text][image7]
 
-![alt text][image6]
-
-Again the degraded results suggests that the model could be overfitted, adding dropout layers to CNN and also introducing regularization could alleviates the overfitting and provides better performance here. This is reserved from future studies.  
+Again the results may be further improved by adding dropout layers to CNN and also introducing regularization, which could alleviate the overfitting. This is reserved from future studies.  
 
 ### (Optional) Visualizing the Neural Network (See Step 4 of the Ipython notebook for more details)
 ####1. Discuss the visual output of your trained network's feature maps. What characteristics did the neural network use to make classifications?
